@@ -6,7 +6,7 @@ using System.Text;
 namespace MovieCharacters.FetchStarwars.Models
 {
     /// <summary>
-    /// Response model for the https://www.swapi.tech/api/people/ api
+    /// Response model for the https://www.swapi.tech/api/people/{id} api
     /// </summary>
     public class StarwarsPeopleByIdResponse
     {
