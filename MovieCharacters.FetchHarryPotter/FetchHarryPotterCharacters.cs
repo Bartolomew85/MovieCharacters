@@ -14,8 +14,17 @@ using Azure.Data.Tables;
 
 namespace MovieCharacters
 {
+    /// <summary>
+    /// Azure Function App to fetch Harry Potter characters from the http://hp-api.herokuapp.com/api/characters api
+    /// </summary>
     public static class FetchHarryPotterCharacters
     {
+        /// <summary>
+        /// Process method for Azure Function App
+        /// </summary>
+        /// <param name="req">The <see cref="HttpRequest"/> with request data</param>
+        /// <param name="log">The <see cref="ILogger>"/> to log with</param>
+        /// <returns></returns>
         [FunctionName("FetchHarryPotterCharacters")]
         public static async Task<IActionResult> Run(
             [HttpTrigger(AuthorizationLevel.Function, "get", Route = null)] HttpRequest req,
@@ -32,6 +41,7 @@ namespace MovieCharacters
             {
                 using (var client = new HttpClient())
                 {
+                    // get characters from API
                     var charactersResult = await client.GetStringAsync(url);
                     var characters = JsonConvert.DeserializeObject<List<HarryPotterCharacter>>(charactersResult);
 
@@ -41,6 +51,7 @@ namespace MovieCharacters
                         new TableSharedKeyCredential(tablestorageAccountName, tablestorageAccountKey)
                     );
 
+                    // upsert characters to Azure Table Storage
                     foreach (var character in characters)
                     {
                         var entity = new TableEntity(character.Movie, character.Name)

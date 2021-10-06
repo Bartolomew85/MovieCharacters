@@ -14,8 +14,17 @@ using Azure.Data.Tables;
 
 namespace MovieCharacters.FetchStarwars
 {
+    /// <summary>
+    /// Azure Function App to fetch Starwars characters from the https://www.swapi.tech/api/people/ api
+    /// </summary>
     public static class FetchStarwarsCharacters
     {
+        /// <summary>
+        /// Process method for Azure Function App
+        /// </summary>
+        /// <param name="req">The <see cref="HttpRequest"/> with request data</param>
+        /// <param name="log">The <see cref="ILogger>"/> to log with</param>
+        /// <returns></returns>
         [FunctionName("FetchStarwarsCharacters")]
         public static async Task<IActionResult> Run(
             [HttpTrigger(AuthorizationLevel.Function, "get", Route = null)] HttpRequest req,
@@ -32,6 +41,7 @@ namespace MovieCharacters.FetchStarwars
             {
                 using (var client = new HttpClient())
                 {
+                    // get characters from API
                     var peopleResult = await client.GetStringAsync(url);
                     var peopleResponse = JsonConvert.DeserializeObject<StarwarsPeopleResponse>(peopleResult);
 
@@ -50,6 +60,7 @@ namespace MovieCharacters.FetchStarwars
                         characters.AddRange(detailedCharacters);
                     }
 
+                    // upsert characters to Azure Table Storage
                     var tableClient = new TableClient(
                         new Uri(tablestorageUrl),
                         tablestorageTableName,
@@ -80,6 +91,13 @@ namespace MovieCharacters.FetchStarwars
             return new OkResult();
         }
 
+        /// <summary>
+        /// Get detailed information for the people in the movie
+        /// </summary>
+        /// <param name="url">The api url to fetch additional data</param>
+        /// <param name="client">The <see cref="HttpClient"/> for querying</param>
+        /// <param name="people">The <see cref="List{}"/> of <see cref="StarwarsPeopleResponsePerson"/> to fetch the detailed information for</param>
+        /// <returns></returns>
         private static async Task<List<StarwarsCharacter>> GetDetailedCharacters(string url, HttpClient client, List<StarwarsPeopleResponsePerson> people)
         {
             List<StarwarsCharacter> characters = new List<StarwarsCharacter>();

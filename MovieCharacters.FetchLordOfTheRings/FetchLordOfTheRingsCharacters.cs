@@ -14,8 +14,17 @@ using Azure.Data.Tables;
 
 namespace MovieCharacters.FetchLordOfTheRings
 {
+    /// <summary>
+    /// Azure Function App to fetch Lord of the Rings characters from the https://the-one-api.dev/v2/character api
+    /// </summary>
     public static class FetchLordOfTheRingsCharacters
     {
+        /// <summary>
+        /// Process method for Azure Function App
+        /// </summary>
+        /// <param name="req">The <see cref="HttpRequest"/> with request data</param>
+        /// <param name="log">The <see cref="ILogger>"/> to log with</param>
+        /// <returns></returns>
         [FunctionName("FetchLordOfTheRingsCharacters")]
         public static async Task<IActionResult> Run(
             [HttpTrigger(AuthorizationLevel.Function, "get", Route = null)] HttpRequest req,
@@ -33,6 +42,7 @@ namespace MovieCharacters.FetchLordOfTheRings
             {
                 using (var client = new HttpClient())
                 {
+                    // get characters from API
                     client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", apikey);
 
                     var charactersResult = await client.GetStringAsync(url);
@@ -46,6 +56,7 @@ namespace MovieCharacters.FetchLordOfTheRings
                         new TableSharedKeyCredential(tablestorageAccountName, tablestorageAccountKey)
                     );
 
+                    // upsert characters to Azure Table Storage
                     foreach (var character in characters)
                     {
                         var entity = new TableEntity(character.Movie, character.Name)
